@@ -53,7 +53,10 @@
       max-width: 1060px; margin: 0 auto;
       display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
     }
-    @media (max-width: 780px) { .wrap { grid-template-columns: 1fr; } }
+    @media (max-width: 780px) {
+      .wrap { grid-template-columns: 1fr; }
+      #cm-output { min-height: 280px; }
+    }
 
     /* ── Inputs panel ── */
     .panel {
@@ -165,7 +168,7 @@
 </head>
 <body>
 
-  <div style="max-width:1060px;margin:0 auto;">
+  <div style="max-width:1060px;margin:0 auto;width:100%;">
     <a href="index.html" class="back-link">← Back to Portfolio</a>
 
     <div class="page-header">

@@ -206,7 +206,7 @@
     }
     .hero-glow--1 { top: -10%; right: -5%; background: rgba(0, 229, 255, 0.06); }
     .hero-glow--2 { bottom: -15%; left: -8%; background: rgba(0, 230, 118, 0.04); }
-    .hero-content { position: relative; z-index: 1; padding: 80px 0; }
+    .hero-content { position: relative; z-index: 1; padding: 60px 0; }
 
     .hero-layout {
       display: grid; grid-template-columns: 1fr 1fr;
@@ -674,7 +674,13 @@
       }
       .nav-links.open { transform: translateY(0); }
       .nav-hamburger { display: flex; }
+      .nav-download span { display: none; }
+      .nav-download { padding: 7px 10px; }
       .hero-stats { gap: 24px; flex-wrap: wrap; }
+      .hero-content { padding: 40px 0; }
+      .hero h1 { margin-bottom: 10px; }
+      .hero p { font-size: 0.95rem; margin-bottom: 28px; }
+      .contact-box { padding: 36px 24px; }
     }
   </style>
 </head>
@@ -712,7 +718,7 @@
       </div>
       <a href="resume.pdf" download="Vijay_Kumar_Resume.pdf" class="nav-download" title="Download Resume">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Resume
+        <span>Resume</span>
       </a>
       <button class="nav-hamburger" id="hamburger" aria-label="Toggle navigation">
         <span></span><span></span><span></span>
