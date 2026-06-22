@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cold Mail Generator — Vijay Kumar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #080b12;
+      color: #c8d0e0;
+      min-height: 100vh;
+      padding: 48px 24px;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none; z-index: -1;
+    }
+
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem; color: #6b7a90;
+      margin-bottom: 40px;
+      transition: color 0.2s;
+      text-decoration: none;
+    }
+    .back-link:hover { color: #00e5ff; }
+
+    .page-header { margin-bottom: 40px; }
+    .page-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem; color: #00e5ff;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .page-label .slash { color: #6b7a90; }
+    .page-title {
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 700; color: #e8edf5;
+      letter-spacing: -0.02em;
+    }
+    .page-sub { color: #6b7a90; font-size: 0.92rem; margin-top: 8px; }
+
+    .wrap {
+      max-width: 1060px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 28px;
+    }
+    @media (max-width: 780px) { .wrap { grid-template-columns: 1fr; } }
+
+    /* ── Inputs panel ── */
+    .panel {
+      background: rgba(255,255,255,0.015);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 14px; padding: 28px;
+    }
+    .panel-title {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; color: #00e5ff;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      margin-bottom: 24px;
+    }
+
+    .field { margin-bottom: 18px; }
+    .field label {
+      display: block;
+      font-size: 0.78rem; font-weight: 500;
+      color: #8896a8; margin-bottom: 6px;
+    }
+    .field label span { color: #4a5a6e; font-weight: 400; }
+    .field input, .field textarea {
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem; color: #e8edf5;
+      outline: none;
+      transition: border-color 0.2s;
+      resize: none;
+    }
+    .field input::placeholder, .field textarea::placeholder { color: #3a4a5e; }
+    .field input:focus, .field textarea:focus {
+      border-color: rgba(0,229,255,0.3);
+      background: rgba(0,229,255,0.02);
+    }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 500px) { .two-col { grid-template-columns: 1fr; } }
+
+    .generate-btn {
+      width: 100%; margin-top: 8px;
+      padding: 13px;
+      background: #00e5ff; color: #080b12;
+      border: none; border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem; font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s;
+      letter-spacing: 0.04em;
+    }
+    .generate-btn:hover { box-shadow: 0 0 40px rgba(0,229,255,0.25); transform: translateY(-1px); }
+
+    /* ── Output panel ── */
+    .output-panel {
+      background: rgba(255,255,255,0.015);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 14px;
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .output-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.01);
+    }
+    .output-filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; color: #4a5a6e;
+    }
+    .output-actions { display: flex; gap: 8px; }
+    .btn-sm {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem; font-weight: 500;
+      padding: 5px 14px; border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.07);
+      background: transparent; color: #8896a8;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-sm:hover { border-color: rgba(0,229,255,0.3); color: #00e5ff; background: rgba(0,229,255,0.04); }
+    .btn-sm.copied { border-color: rgba(0,230,118,0.4); color: #00e676; }
+
+    #cm-output {
+      flex: 1;
+      padding: 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem; line-height: 1.85;
+      color: #8896a8;
+      white-space: pre-wrap; word-break: break-word;
+      overflow-y: auto;
+      min-height: 400px;
+    }
+    #cm-output.has-content { color: #c8d0e0; }
+
+    /* subject line highlight */
+    .subject-line {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      padding: 10px 20px;
+      background: rgba(0,229,255,0.04);
+      border-bottom: 1px solid rgba(0,229,255,0.06);
+      color: #00e5ff;
+      display: none;
+    }
+    .subject-line span { color: #4a5a6e; margin-right: 6px; }
+  </style>
+</head>
+<body>
+
+  <div style="max-width:1060px;margin:0 auto;">
+    <a href="index.html" class="back-link">← Back to Portfolio</a>
+
+    <div class="page-header">
+      <p class="page-label"><span class="slash">//</span> Outreach</p>
+      <h1 class="page-title">Cold Mail Generator</h1>
+      <p class="page-sub">Fill in the details — your personalized cold email is ready to copy.</p>
+    </div>
+
+    <div class="wrap">
+      <!-- Inputs -->
+      <div class="panel">
+        <p class="panel-title">// mail_config</p>
+
+        <div class="two-col">
+          <div class="field">
+            <label>Recipient Name</label>
+            <input id="cm-name" type="text" placeholder="e.g. Sarah" />
+          </div>
+          <div class="field">
+            <label>Company Name</label>
+            <input id="cm-company" type="text" placeholder="e.g. Stripe" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Role applying for</label>
+          <input id="cm-role" type="text" placeholder="e.g. Senior Frontend Engineer" />
+        </div>
+
+        <div class="field">
+          <label>What impressed you about them? <span>(optional)</span></label>
+          <input id="cm-hook" type="text" placeholder="e.g. your work on distributed payments infra" />
+        </div>
+
+        <div class="field">
+          <label>Your key highlight <span>(optional)</span></label>
+          <input id="cm-highlight" type="text" placeholder="e.g. cut load time by 70% at Emvigo" />
+        </div>
+
+        <div class="field">
+          <label>Availability <span>(optional)</span></label>
+          <input id="cm-avail" type="text" placeholder="e.g. available from July 2025" />
+        </div>
+
+        <button class="generate-btn" onclick="generateMail()">Generate Mail ✦</button>
+      </div>
+
+      <!-- Output -->
+      <div class="output-panel">
+        <div class="subject-line" id="cm-subject-wrap">
+          <span>Subject:</span><span id="cm-subject-text"></span>
+        </div>
+        <div class="output-header">
+          <span class="output-filename">// cold_mail.txt</span>
+          <div class="output-actions">
+            <button class="btn-sm" id="copy-subject-btn" onclick="copySubject()" style="display:none">Copy Subject</button>
+            <button class="btn-sm" id="copy-btn" onclick="copyMail()">Copy Mail</button>
+          </div>
+        </div>
+        <pre id="cm-output">Fill the fields and click Generate ↑</pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function val(id) { return document.getElementById(id).value.trim(); }
+
+    function generateMail() {
+      const name      = val('cm-name')    || 'Hiring Manager';
+      const company   = val('cm-company') || 'your company';
+      const role      = val('cm-role')    || 'a senior engineering role';
+      const hook      = val('cm-hook');
+      const highlight = val('cm-highlight');
+      const avail     = val('cm-avail');
+
+      const subject = `${role} — 7+ Years | React, Node.js, Go, AWS`;
+
+      const hookLine = hook
+        ? `I came across ${company} and was genuinely impressed by ${hook}.`
+        : `I came across ${company} and was impressed by the engineering work your team is doing.`;
+
+      const highlightLine = highlight
+        ? `Most recently, I ${highlight}.`
+        : `Most recently, I led micro frontend architecture at Wipro — cutting release cycles by 40%.`;
+
+      const availLine = avail ? `\nI'm ${avail} and open to a conversation at your convenience.` : '';
+
+      const mail =
+`Hi ${name},
+
+${hookLine}
+
+I'm Vijay Kumar, a Senior Software Engineer with 7+ years building high-performance web apps, microservices, and cloud-native systems.
+
+A few highlights:
+→ Cut API response time by 30–40% with Go-based backend services
+→ Reduced load time by 70% using Next.js optimizations
+→ Led Azure CI/CD pipelines, cutting release time by 50%
+→ ${highlightLine.replace('Most recently, I ', '')}
+
+Stack: React · Node.js · Go · Next.js · AWS · Azure · GraphQL · Docker
+
+I'd love to explore if there's a fit for the ${role} role at ${company}.${availLine}
+
+Portfolio → https://vijayk2508.github.io/myportfolio/
+
+Would you be open to a quick 15-minute call this week?
+
+Best,
+Vijay Kumar
+📞 +91-87551-33500
+✉️ official.vijay.2508@gmail.com
+🔗 linkedin.com/in/vijayk2508`;
+
+      const out = document.getElementById('cm-output');
+      out.textContent = mail;
+      out.classList.add('has-content');
+
+      document.getElementById('cm-subject-text').textContent = subject;
+      document.getElementById('cm-subject-wrap').style.display = 'block';
+      document.getElementById('copy-subject-btn').style.display = 'inline-flex';
+    }
+
+    function copyMail() {
+      const text = document.getElementById('cm-output').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copy-btn');
+        btn.textContent = 'Copied ✓';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy Mail'; btn.classList.remove('copied'); }, 2000);
+      });
+    }
+
+    function copySubject() {
+      const text = document.getElementById('cm-subject-text').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copy-subject-btn');
+        btn.textContent = 'Copied ✓';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Copy Subject'; btn.classList.remove('copied'); }, 2000);
+      });
+    }
+
+    // generate on Enter key
+    document.querySelectorAll('input').forEach(input => {
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') generateMail(); });
+    });
+  </script>
+</body>
+</html>
